@@ -1,8 +1,8 @@
 # Besvarelse - Refleksjon og Analyse
 
-**Student:** [Ditt navn]
+**Student:** [Danny nguyen]
 
-**Studentnummer:** [Ditt studentnummer]
+**Studentnummer:** [405089]
 
 **Dato:** [Innleveringsdato]
 
@@ -15,10 +15,19 @@
 **Identifiserte entiteter:**
 
 [Skriv ditt svar her - list opp alle entitetene du har identifisert]
+jeg har indentifiesrt entitetene {sykkler, lås, stasjon, kunde, utleie} jeg mener disse entitene er essensielle for case oppgaven. 
+
 
 **Attributter for hver entitet:**
 
 [Skriv ditt svar her - list opp attributtene for hver entitet]
+sykkell entiteten har attributtene sykkel_id, sykkel_modell, stasjon_id og lås_nr.
+lås entiteten har en lås_id, lås_nr og stasjon_id
+stasjon entiteten har attributtene stasjon_id og stasjon_addresse.
+kunde har kunde_id, fornavn, etternavn, epost, mobilnr.
+utleie har utleie_id, kunde_id, start_stasjon_id, slutt_stasjon_id, utleie_tidspunkt og innlevert_tidspunkt.
+
+
 
 ---
 
@@ -28,13 +37,27 @@
 
 [Skriv ditt svar her - forklar hvilke datatyper du har valgt for hver attributt og hvorfor]
 
+for alle id attributtene har jeg SERIAL når de er i pk men int i fk.
+fornavn, Stasjon_addresse, sykkel_modell etternavn og epost og mobillnr har jeg som VARCHAR siden navn er naturligvis VARCHAR, jeg valgte å putte mobillnr som varchar isteder for int siden jeg ikke skal gjøre noen mattamatiske regninger med mobillnret.
+utleie og innlevert_tidspunkt har datatypen TIMESTAMP siden de er tidspunkt.
+las_nr er int siden den beskriver hvilken lås i stasjonen det er.
+
 **`CHECK`-constraints:**
 
 [Skriv ditt svar her - list opp alle CHECK-constraints du har lagt til og forklar hvorfor de er nødvendige]
+    CHECK (mobilnr ~ '^[0-9]{8}$'),
+    CHECK (epost LIKE '%_@_%._%')
+    
+jeg har en check restraint for EPOST og mobillnr siden det er klare krav for både epost og mobillnr.
+
+checken i epost sikrer at det må være noe som kommer før og etter en "@" og etter det som kommer etter en @ så kommer det en "." og det må være noe etter der igjen. 
+checken i mobilnr sørger for at du skriver et tall fra 0-9 og at det må være 8 siffer. 
 
 **ER-diagram:**
 
 [Legg inn mermaid-kode eller eventuelt en bildefil fra `mermaid.live` her]
+<img width="2776" height="976" alt="image" src="https://github.com/user-attachments/assets/216e1fee-5191-41be-9f59-c52ef973e7cd" />
+
 
 ---
 
@@ -43,14 +66,20 @@
 **Valgte primærnøkler og begrunnelser:**
 
 [Skriv ditt svar her - forklar hvilke primærnøkler du har valgt for hver entitet og hvorfor]
+i dens tabell vil deres id være primærnøklen. altså kunde_id, lås_id, utleie_id, stasjon_id, sykkel_id er primær nøkkel. jeg valgte idene som primærnøkkel siden id skal være unikt fra alle av dens type. 
+
 
 **Naturlige vs. surrogatnøkler:**
 
 [Skriv ditt svar her - diskuter om du har brukt naturlige eller surrogatnøkler og hvorfor]
 
+jeg har brukt suroogatnøkler siden jeg har skapt diverse IDer som primærnøkkler noe som ikke finnes i den ekte verden. dette gjør jeg siden det er lettere og for noen av primærnøkklen blir der komplisert dersom jeg bruker naturlige nøkkler feks i utleie tabellen. Itillegg sier oppgave casen at hver sykkel skal ha unikt ID så jeg bare valgte og fortsette med ID. Men det finnes selfølgelig naturlige nøkkler som kunne blitt brukt for mange av tabbelene. mobillnr eller epost kunne blitt brukt som naturlig nøkkler i kunde tabellen. jeg tror alle sykler burde ha en serialnumber som er nesten som en id som hadde blitt en naturlig nøkkel om jeg valgte å bruke den samme finns det sikkert for låser. men for utleie tabellen blir det litt vannskeligere siden den tabellen fungerer litt annderledes enn de andre den fungerer litt som et program.
+
 **Oppdatert ER-diagram:**
 
 [Legg inn mermaid-kode eller eventuelt en bildefil fra `mermaid.live` her]
+<img width="2808" height="730" alt="image" src="https://github.com/user-attachments/assets/247cd08f-abe4-41bc-908b-d3b5c5d8efc5" />
+
 
 ---
 
@@ -60,13 +89,28 @@
 
 [Skriv ditt svar her - list opp alle forholdene mellom entitetene og angi kardinalitet]
 
+    STASJON ||--o{ SYKKEL : "har"
+    KUNDE ||--o{ UTLEIE : "leier"
+    STASJON ||--o{ UTLEIE : "start_stasjon"
+    STASJON ||--o{ UTLEIE : "slutt_stasjon
+    LÅS ||--|| SYKKEL : "har"
+    LÅS }o--|| STASJON : "har
+siden stasjon kan ha en eller flere sykkler er forholdet en-til-mange. 
+i dette systemet valgte jeg at en kunde kan leie flere sykkler som betyr at en kunde kan ha flere utleier som betyr en-til-mange.
+siden start for å leie trenger man hvilken start og slutt stasjon. siden det kan bli leiet flere sykkler fra en stasjon er forholde også en-til-mange.
+
 **Fremmednøkler:**
 
 [Skriv ditt svar her - list opp alle fremmednøklene og forklar hvordan de implementerer forholdene]
 
+i sykkel tabellen er stasjon_id en fremmednøkkel siden dersom sykkel hadde vært en fremmednøkkel i stajson så hadde det vært ueffektivt, siden en stasjon kan ha flere sykkler. Men en sykkel kan bare ha en stasjon og dersom sykkelen er i bruk har den ingen(NULL).
+
+alle de andre fremmednøkklene eksistere i utleid tabbelen som gjør at denne tabbelen er "limet" til databasen. Som gir mening siden deres forhold eksisterer kun når en kunde leier en sykkel. I praksis for å kunne leie ut en sykkel trenger vi en kunde for å leie ut en sykkel fra en stasjon som skal leveres til en annen stasjon. derfor i denne tabellen har vi kunde_id, sykkel_id, start_stasjon_id, slutt_stasjon_id som fremmednøkkler.
 **Oppdatert ER-diagram:**
 
 [Legg inn mermaid-kode eller eventuelt en bildefil fra `mermaid.live` her]
+<img width="1074" height="1340" alt="image" src="https://github.com/user-attachments/assets/e428f0a6-777c-4ca9-8e07-84513b8fca97" />
+
 
 ---
 
@@ -76,18 +120,24 @@
 
 [Skriv ditt svar her - forklar om datamodellen din tilfredsstiller 1NF og hvorfor]
 
+datamodellen tilfredsstiller 1NF siden alle kolonnene er atomære som betyr at de ikke kan deles opp altså at de ikke er en liste men heller en dataype som VARVHAR, INT osv. itillegg har alle tabellene en primær nøkkel. 
+
 **Vurdering av 2. normalform (2NF):**
 
 [Skriv ditt svar her - forklar om datamodellen din tilfredsstiller 2NF og hvorfor]
+
+datamodellen min tilfredsstiller 2nf først å fremst fordi den gjør 1nf. uten om det er har alle tabellen kun en primærnøkkel, hvor alle attributtene i tabellene er avhengi av. tabellene kan altså ikke deles i mindre deler.
 
 **Vurdering av 3. normalform (3NF):**
 
 [Skriv ditt svar her - forklar om datamodellen din tilfredsstiller 3NF og hvorfor]
 
+modellen min tifredstiller 2nf og ingen av attributtene har noen avhengihet mellom hverandre, derfor er den også 3nf.
 **Eventuelle justeringer:**
 
 [Skriv ditt svar her - hvis modellen ikke var på 3NF, forklar hvilke justeringer du har gjort]
 
+modellen var 3nf
 ---
 
 ## Del 2: Database-implementering
