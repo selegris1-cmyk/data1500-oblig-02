@@ -150,11 +150,11 @@ modellen var 3nf
 
 **Antall testdata:**
 
-- Kunder: [antall]
-- Sykler: [antall]
-- Sykkelstasjoner: [antall]
-- Låser: [antall]
-- Utleier: [antall]
+- Kunder: [5]
+- Sykler: [100]
+- Sykkelstasjoner: [5]
+- Låser: [100]
+- Utleier: [50]
 
 ---
 
@@ -178,6 +178,14 @@ ORDER BY table_name;
 
 ```
 [Skriv resultatet av spørringen her - list opp alle tabellene som ble opprettet]
+ table_name 
+------------
+ kunde
+ laas
+ stasjon
+ sykkel
+ utleie
+(5 rows)
 ```
 
 ---
@@ -189,19 +197,19 @@ ORDER BY table_name;
 **SQL for å opprette rolle:**
 
 ```sql
-[Skriv din SQL-kode for å opprette rollen 'kunde' her]
+CREATE ROLE kunde;
 ```
 
 **SQL for å opprette bruker:**
 
 ```sql
-[Skriv din SQL-kode for å opprette brukeren 'kunde_1' her]
+CREATE USER kunde_1 WITH PASSWORD 'passord123';
 ```
 
 **SQL for å tildele rettigheter:**
 
 ```sql
-[Skriv din SQL-kode for å tildele rettigheter til rollen her]
+GRANT kunde TO kunde_1;
 ```
 
 ---
@@ -211,12 +219,15 @@ ORDER BY table_name;
 **SQL for VIEW:**
 
 ```sql
-[Skriv din SQL-kode for VIEW her]
+CREATE VIEW kunde_1_utleier AS SELECT * FROM utleie WHERE kunde_id = 1;
+GRANT SELECT ON kunde_1_utleier TO kunde;
 ```
 
 **Ulempe med VIEW vs. POLICIES:**
 
 [Skriv ditt svar her - diskuter minst én ulempe med å bruke VIEW for autorisasjon sammenlignet med POLICIES]
+
+en ulemple ved å bruke VIEW er at man må lage en view for hver enkelt bruker. som passer greit for nå siden det er kun 5 brukere, men dersom vi hadde utvidet den til å kunne hatt 1000+ brukere blir det ueffektivt å gjøre det slikt. Men POLICY skalerer etter antall bruker som funker best med flere brukere.
 
 ---
 
@@ -234,13 +245,37 @@ ORDER BY table_name;
 
 [Skriv din utregning her]
 
+utleie tabellen vil ha totalt 20000*5 = 100000 for høysesongen 5000*4 = 20000 for mellomsesong og 500*3=1500 for lavsesongen. totalt blir dette 121500 rader i utleie tabellen.
+
+
 **Estimat for lagringskapasitet:**
 
-[Skriv din utregning her - vis hvordan du har beregnet lagringskapasiteten for hver tabell]
+
+først beregner jeg cirka med et estimat i tabellene som er statiske det vil si sykkel, lås og stasjon. siden vi antar at ingen sykkler blir mistet, erstattes eller kan bli ødelagt, i tillegg til at vi ikke introduserer nye sykkler. samme antagelse gjør vi for statsjon og låser. 
+
+sykkel tabbel. 100 sykkler. som betyr 100 rader
+sykkel id vil ta 4 byte siden datatypen er SERIAL samme med stasjon_id og lås_id 4 hver. pluss sykkel_modell som vil ta 8 byte siden alle sykklene er 'STANDARD'. altså 4+4+4+8=20. altså 20 pluss postgreSQL sin overhead som er på ca 23 byte som blir 43. 43 byte hver sykkel som betyr for 100 sykler blir der 4300 byte totalt
+
+stasjon tabbelen har 5 stasjoner som betyr 5 rader.
+stasjon_id som tar 4 byte pluss stasjon_adresse som tar ca. 15 byte hver addresse. tilsammen blir der 4+15+23(POSTGRESQL overhead)= 42 byte hver rad. og 42*5 =210 byte for sykkel tabellen
+
+laas tabellen har 100 låaser som betyr 100 rader.
+laas_id, laas_nr og stasjon_id tar 4 hver som betyr hver rad tar 4*3+23 = 35. 35*100 = 3500 som er hvor mye byte laas tabellen bruker.
+
+
+kunde er litt spesiel siden vi har foreløbbig 5 kunder men det vil realistisk kreve mange flere for at det skal kunne gjøre 20000 utleier i en måned i høy sesong. la oss være trygge å si at det vil kreve 2000 totale kunder som betyr at i høy sesong estimerer vi at hver kunde leier ca 10 ganger i måneden som betyr 2000 rader.
+kunde_id tar 4 byte. fornavn tar maks 15 byte siden vi har VARCHAR(15) samme med etternavn. epost kan være 100 byte per og mobillnr er 8 hver. tilsammen blir det 4+15+15+100+8+23=166. so totalt blir det 166*2000 for hver rad som blir 332000 byte for kunde tabellen. 
+
+
+utleie_id, kunde_id, sykkel_id, start/slutt_stasjon_id tar 4 byte hver. innlevering og utleie tidspunkt tar 8 hver og leiebeløp tar 6 siden NUMERIC(6,2) har kun 6 siffer. totalt blir det 4+4+4+4+4+8+8+6+23=65 for hver rad og 65*121500 = 7897500 byte. 
+
+
 
 **Totalt for første år:**
 
-[Skriv ditt estimat her]
+om vi nå plusser alle tabellene sammen får vi 7897500+332000+3500+210+4300=8237510
+
+så lagringskapasiteten må være ca 8237510 byte eller ca 8.3 mb
 
 ---
 
@@ -252,29 +287,49 @@ ORDER BY table_name;
 
 [Skriv ditt svar her - gi konkrete eksempler fra CSV-filen som viser redundans]
 
+vi har samme person som utleier sykkel feks Kari Olsen med denne strukturen blir Kari Olsen skrevet flere ganger som tar opp unødvendig mye dataplass for hver gang samme person blir nevnt.
+
 **Problem 2: Inkonsistens**
 
 [Skriv ditt svar her - forklar hvordan redundans kan føre til inkonsistens med eksempler]
 
+redudans kan føre til inkonsistens siden dersom en persons informasjon endres så må alle tidligere informasjon om den personen endre også eller så vil modellen være inkonsistent. feks. hvis Kari Olsen nå hadde byttet mobilnr også leid ut en ny sykkel hadde vi fått en ny rad med Kari Oslen med et annet mobilnr sammenlignet med hva modellen sier tidligere.
+
 **Problem 3: Oppdateringsanomalier**
 
 [Skriv ditt svar her - diskuter slette-, innsettings- og oppdateringsanomalier]
-
+la oss si en person utleier en sykkel nå da vil det oppså en nullverdig i slutt_stasjon_navn som skaper innsettnings problemer. i tillegg dersom vi ønsket å slette en av Kari sine utleier så er det mulig vi sletter alle hennes utleier som er kanskje ikke det vi ønsker å gjøre. og problemet med inkonsitens kan oppsta dersom vi skulle oppdatere mobillnr til noen som forklart i problem 2.
 **Fordeler med en indeks:**
 
 [Skriv ditt svar her - forklar hvorfor en indeks ville gjort spørringen mer effektiv]
 
+med indexer så unngår vi at personer med samme navn vil bli mixet opp under en spørring. i tillegg er det lettere å gjøre skrive feil i spørringene hvis det er navn og ikke indexer spesielt med lengere navn. Vi kan også gi indexer til ikke bare utleier men også til kunder, sykkler og stasjoner får å lettere kunne sortere etter hva enn man ønsker. i tillegg blir  spørringer med effectivt, siden datamaskinen slipper å lese gjennom hele tabellen. 
+
 **Case 1: Indeks passer i RAM**
 
 [Skriv ditt svar her - forklar hvordan indeksen fungerer når den passer i minnet]
+man får plass til indeks i minnet så får du gjort opperasjoner mer effektivt. Siden med spørringer så trenger ikke datamaskinen lenger å lese gjennom hver eneste rad hvis du skulle feks underforske hvilke sykkel_id som han er en hvis modell, med indeks så leses kun de aktuelle radene.
 
 **Case 2: Indeks passer ikke i RAM**
 
 [Skriv ditt svar her - forklar hvordan flettesortering kan brukes]
 
+dersom indeks ikke lagrings plass kan systemet forstsatt bruke en flettesortering som en alternativ metode for å sortere informasjon på. flettesortering går ut på og dele data i mindre deler og sorterer i de mindre delene, deretter så legger du sammen delene og sorterer dem igjen. denne prossesen er ikke like effectiv som indeksering men er fortsatt effectiv.
 **Datastrukturer i DBMS:**
 
 [Skriv ditt svar her - diskuter B+-tre og hash-indekser]
+
+postgresSQL bruker B+-tre by default. dette er fordi B+-tre er et system som deler informasjon lik som grener og blader, hele treet er koblet så man kan lett finne ut hvilken gren informasjonen du søker for er også deretter blad gjennom hvilket blad-node informasjonen ligger. Dette er også nyttig for fordi det gjør det lettere å gjøre andre opperasjoner som (<,>). Derfor kan vi bruke feks
+sql.
+WHERE sykkel_id =10
+
+WHERE sykkel_id <10
+
+hash fungere anderledes fra B+-tree istedet for å lagre inforsjon i grener og blader så er den mer som bokser eller bøtter. feks sykkel_id(1-10) vil finnes i boks1 sykkel_id(11-20) i bøtte2 osv. dette gjør det mye raskere å identifisere spesefikt hvor en av sykkel_idene ligger. men siden informasjonen inni en bøtte er så si tilfeldig plasert klarer den ikke å bruke opperatorer som (<,>). alstå
+SQL
+WHERE sykkel_id = 10.   --dette funker perfect med hash-indekser--
+
+WHERE sykkel_id <10.   --dette funker ikke siden den ikke har noen peiling på rekkefølgen inni bøtten--
 
 ---
 
@@ -295,6 +350,9 @@ ORDER BY table_name;
 [Skriv ditt svar her - forklar hvordan datastrukturen håndterer sjeldne lese-operasjoner]
 
 ---
+om jeg skulle ha implementert loggføring så hadde jeg brukt en heap-fil datastruktur. siden det som er fornuftig loggføre hver gang en kunde utleier en sykker og innleverer den som er greit å ha i en kronologisk sortering som heap-fil gjør by default. pluss tilsammen blir det litt mange små skrive opperasjoner. samtidig som at det er veldig sjeldent at man skal drive å lese disse loggene det er ikke mye interesant der. derfor er en heap-fil mer aktuell for denne data modellen. sammenliknet med en LSM-tree som er mer komplisert og brukt for å loggføre veldig store systemer eller for å analysere loggene.
+
+
 
 ### Oppgave 4.4: Validering i flerlags-systemer
 
@@ -302,9 +360,15 @@ ORDER BY table_name;
 
 [Skriv ditt svar her - argumenter for validering i ett eller flere lag]
 
+dersom dette systemet skulle had en web-applikasjon med et applikasjonslag så hadde det vært fornuftig å ha det på alle lag nettleseren, applikasjonslag, og databasen.
+
+Valideringen i nettleser bør hovedsaklig være for bedre bruker opplevelse og for små skjekk for epost og mobilnr. Databassen bør ha vaildering for å sikre integritet, jeg har allerede implimentert CHECK RESTRAINTS for å sikre at kun gokjente eposter og mobilnr kan bli inkludert i databasen. Men der det er aller viktigst å ha validering er i applikasjonslaget siden det fungerer som hjernen av systemet. forretningsreglene ligger i dette laget som betyr at dersom noe hadde skjedd i dette laget hadde det hatt størst konsekvens. Itillegg kommer alle input fra brukeren gjennom applikasjonslaget derfor vil det kreve mest vailidering.
+Valideringen bør altså ligge i alle lagene for å ha bedre datakvalitet og for å sikre systemet mot angrep og får at forretningslogikken ikke blir forstyrret. Validering bør være i  variende mengde, nettleser trenger ikke like mye og er hovedsaklig for bruker opplevelse. databasen bør ha det for å sikre datasystemet, men det bør ligge mye validering i applikasjonslaget siden det er det mest sentralet organet i systemet.
+
 **Validering i nettleseren:**
 
 [Skriv ditt svar her - diskuter fordeler og ulemper]
+
 
 **Validering i applikasjonslaget:**
 
@@ -325,10 +389,13 @@ ORDER BY table_name;
 **Hva har du lært så langt i emnet:**
 
 [Skriv din refleksjon her - diskuter sentrale konsepter du har lært]
+så langt i emnet har jeg lært hvordan man lager datamodeller etter normaliseringsformene for mest effektive modeller. jeg hadde tidligere aldri brukt terminalen men nå klarer jeg å bruke spørringer, koble til docker og postgreSQL. jeg har også fått en forsårelse av relasjonalgebra. jeg har itillegg lært hvordan man lager ER-diagrammer i Mermaid
+
 
 **Hvordan har denne oppgaven bidratt til å oppnå læringsmålene:**
 
 [Skriv din refleksjon her - koble oppgaven til læringsmålene i emnet]
+denne oppgaven har hjulpet meg bedre forstå hva som trengs for en god database som ligner mer noe virkelig. denne oppgaven har også hjulpet meg forstå loggføring og indeksering og hvilket system jeg bør implementere avhengi at datamodellen og casen min. for denne oppgaven trengte jeg å bruke SQL og mermaid to ting jeg ikke viste mye om, men nå etter oppgaven er jeg mer konfertable med dem. 
 
 Se oversikt over læringsmålene i en PDF-fil i Canvas https://oslomet.instructure.com/courses/33293/files/folder/Plan%20v%C3%A5ren%202026?preview=4370886
 
