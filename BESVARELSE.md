@@ -359,8 +359,10 @@ på oppgave 5.8 prøvde jeg å bare skjekke WHERE innleverings.tidspunkt- utleie
 
 skulle bare skjekke hva som hadde kommet ut siden jeg viste at det ikke skulle fungere siden jeg vet ikke selv hva 50 skulle representere. men senere fant jeg ut at det funker ikke å gjøre det slikt men at man må bruke AGE og at jeg ikke skal bruke innleveringstid siden sykkelen er jo ikke levert. Jeg fant ut at AGE gir et INTERVAL så da gikk det til slutt med 
 
-WHERE AGE(NOW(),utleie_tidspunkt) >INTERVAL '1 day'
-og for å bekrefte at den ikke var levert så inkluderte jeg 
+WHERE AGE(NOW(),utleie_tidspunkt) >INTERVAL '1 day'.
+
+og for å bekrefte at den ikke var levert så inkluderte jeg.
+
 AND innlevert_tidspunkt IS  NULL;
 
 
