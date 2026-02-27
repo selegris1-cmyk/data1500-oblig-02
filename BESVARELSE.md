@@ -372,13 +372,12 @@ Valideringen bør altså ligge i alle lagene for å ha bedre datakvalitet og for
 
 **Hva har du lært så langt i emnet:**
 
-[Skriv din refleksjon her - diskuter sentrale konsepter du har lært]
+
 så langt i emnet har jeg lært hvordan man lager datamodeller etter normaliseringsformene for mest effektive modeller. jeg hadde tidligere aldri brukt terminalen men nå klarer jeg å bruke spørringer, koble til docker og postgreSQL. jeg har også fått en forsårelse av relasjonalgebra. jeg har itillegg lært hvordan man lager ER-diagrammer i Mermaid
 
 
 **Hvordan har denne oppgaven bidratt til å oppnå læringsmålene:**
 
-[Skriv din refleksjon her - koble oppgaven til læringsmålene i emnet]
 denne oppgaven har hjulpet meg bedre forstå hva som trengs for en god database som ligner mer noe virkelig. denne oppgaven har også hjulpet meg forstå loggføring og indeksering og hvilket system jeg bør implementere avhengi at datamodellen og casen min. for denne oppgaven trengte jeg å bruke SQL og mermaid to ting jeg ikke viste mye om, men nå etter oppgaven er jeg mer konfertable med dem. 
 
 Se oversikt over læringsmålene i en PDF-fil i Canvas https://oslomet.instructure.com/courses/33293/files/folder/Plan%20v%C3%A5ren%202026?preview=4370886
@@ -387,9 +386,12 @@ Se oversikt over læringsmålene i en PDF-fil i Canvas https://oslomet.instructu
 
 [Skriv din refleksjon her - diskuter hvilke deler av oppgaven som var mest krevende]
 
+Den mest krevende delen av oppgaven var oppgave 1 og 2. Oppgave 1 handlet om å lage en godt datamodell som var utfordrene siden jeg ikke hadde øvd nok på det. Oppgave 2 var utfordrene på grunn av utleie testdataen. det tok langt tid å lære hvordan jeg skulle gjøre det. 
 **Hva har du lært om databasedesign:**
 
 [Skriv din refleksjon her - reflekter over prosessen med å designe en database fra bunnen av]
+
+jeg har lært at man kan Designe databaser med sikkerhet og dataintegritet og at det er mer enn å bare lagre data. det er veldig mange små detaljer som er nødvenidege for å ha en god database, som a asigne korrekte datatype og bestemme om du skal bruke naturlig eller surrogat nøkkler. Fremmed nøkkler var en av de mest utfordrene og viktigste aspectene som jeg lærte gjennom oppgaven. Prossesen er fylt med små valg som blir betydnings fylle slutt resultatet av databasen.
 
 ---
 
@@ -402,40 +404,13 @@ Se oversikt over læringsmålene i en PDF-fil i Canvas https://oslomet.instructu
 
 **Eventuelle feil og rettelser:**
 
-[Skriv ditt svar her - hvis noen tester feilet, forklar hva som var feil og hvordan du rettet det]
+på oppgave 5.8 prøvde jeg å bare skjekke WHERE innleverings.tidspunkt- utleie_tidspunkt > 50
 
----
+skulle bare skjekke hva som hadde kommet ut siden jeg viste at det ikke skulle fungere siden jeg vet ikke selv hva 50 skulle representere. men senere fant jeg ut at det funker ikke å gjøre det slikt men at man må bruke AGE og at jeg ikke skal bruke innleveringstid siden sykkelen er jo ikke levert. Jeg fant ut at AGE gir et INTERVAL så da gikk det til slutt med 
 
-## Del 6: Bonusoppgaver (Valgfri)
+WHERE AGE(NOW(),utleie_tidspunkt) >INTERVAL '1 day'
+og for å bekrefte at den ikke var levert så inkluderte jeg 
+AND innlevert_tidspunkt IS  NULL;
 
-### Oppgave 6.1: Trigger for lagerbeholdning
-
-**SQL for trigger:**
-
-```sql
-[Skriv din SQL-kode for trigger her, hvis du har løst denne oppgaven]
-```
-
-**Forklaring:**
-
-[Skriv ditt svar her - forklar hvordan triggeren fungerer]
-
-**Testing:**
-
-[Skriv ditt svar her - vis hvordan du har testet at triggeren fungerer som forventet]
-
----
-
-### Oppgave 6.2: Presentasjon
-
-**Lenke til presentasjon:**
-
-[Legg inn lenke til video eller presentasjonsfiler her, hvis du har løst denne oppgaven]
-
-**Hovedpunkter i presentasjonen:**
-
-[Skriv ditt svar her - oppsummer de viktigste punktene du dekket i presentasjonen]
-
----
 
 **Slutt på besvarelse**
