@@ -146,7 +146,6 @@ modellen var 3nf men måtte gjøre noen justeringer som ikke var direkte nødven
 
 **Dokumentasjon av vellykket kjøring:**
 
-[Skriv ditt svar her - f.eks. skjermbilder eller output fra terminalen som viser at databasen ble opprettet uten feil]
 
 **Spørring mot systemkatalogen:**
 
@@ -209,8 +208,6 @@ GRANT SELECT ON kunde_1_utleier TO kunde;
 
 **Ulempe med VIEW vs. POLICIES:**
 
-[Skriv ditt svar her - diskuter minst én ulempe med å bruke VIEW for autorisasjon sammenlignet med POLICIES]
-
 en ulemple ved å bruke VIEW er at man må lage en view for hver enkelt bruker. som passer greit for nå siden det er kun 5 brukere, men dersom vi hadde utvidet den til å kunne hatt 1000+ brukere blir det ueffektivt å gjøre det slikt. Men POLICY skalerer etter antall bruker som funker best med flere brukere.
 
 ---
@@ -226,8 +223,6 @@ en ulemple ved å bruke VIEW er at man må lage en view for hver enkelt bruker. 
 - Lavsesong (desember-februar): 500 utleier/måned
 
 **Totalt antall utleier per år:**
-
-[Skriv din utregning her]
 
 utleie tabellen vil ha totalt 20000*5 = 100000 for høysesongen 5000*4 = 20000 for mellomsesong og 500*3=1500 for lavsesongen. totalt blir dette 121500 rader i utleie tabellen.
 
@@ -254,7 +249,6 @@ kunde_id tar 4 byte. fornavn tar maks 15 byte siden vi har VARCHAR(15) samme med
 utleie_id, kunde_id, sykkel_id, start/slutt_stasjon_id tar 4 byte hver. innlevering og utleie tidspunkt tar 8 hver og leiebeløp tar 6 siden NUMERIC(6,2) har kun 6 siffer. totalt blir det 4+4+4+4+4+8+8+6+23=65 for hver rad og 65*121500 = 7897500 byte. 
 
 
-
 **Totalt for første år:**
 
 om vi nå plusser alle tabellene sammen får vi 7897500+332000+3500+210+4300=8237510
@@ -269,39 +263,31 @@ så lagringskapasiteten må være ca 8237510 byte eller ca 8.3 mb
 
 **Problem 1: Redundans**
 
-[Skriv ditt svar her - gi konkrete eksempler fra CSV-filen som viser redundans]
-
 vi har samme person som utleier sykkel feks Kari Olsen med denne strukturen blir Kari Olsen skrevet flere ganger som tar opp unødvendig mye dataplass for hver gang samme person blir nevnt.
 
 **Problem 2: Inkonsistens**
 
-[Skriv ditt svar her - forklar hvordan redundans kan føre til inkonsistens med eksempler]
 
 redudans kan føre til inkonsistens siden dersom en persons informasjon endres så må alle tidligere informasjon om den personen endre også eller så vil modellen være inkonsistent. feks. hvis Kari Olsen nå hadde byttet mobilnr også leid ut en ny sykkel hadde vi fått en ny rad med Kari Oslen med et annet mobilnr sammenlignet med hva modellen sier tidligere.
 
 **Problem 3: Oppdateringsanomalier**
 
-[Skriv ditt svar her - diskuter slette-, innsettings- og oppdateringsanomalier]
 la oss si en person utleier en sykkel nå da vil det oppså en nullverdig i slutt_stasjon_navn som skaper innsettnings problemer. i tillegg dersom vi ønsket å slette en av Kari sine utleier så er det mulig vi sletter alle hennes utleier som er kanskje ikke det vi ønsker å gjøre. og problemet med inkonsitens kan oppsta dersom vi skulle oppdatere mobillnr til noen som forklart i problem 2.
 **Fordeler med en indeks:**
 
-[Skriv ditt svar her - forklar hvorfor en indeks ville gjort spørringen mer effektiv]
 
 med indexer så unngår vi at personer med samme navn vil bli mixet opp under en spørring. i tillegg er det lettere å gjøre skrive feil i spørringene hvis det er navn og ikke indexer spesielt med lengere navn. Vi kan også gi indexer til ikke bare utleier men også til kunder, sykkler og stasjoner får å lettere kunne sortere etter hva enn man ønsker. i tillegg blir  spørringer med effectivt, siden datamaskinen slipper å lese gjennom hele tabellen. 
 
 **Case 1: Indeks passer i RAM**
 
-[Skriv ditt svar her - forklar hvordan indeksen fungerer når den passer i minnet]
 man får plass til indeks i minnet så får du gjort opperasjoner mer effektivt. Siden med spørringer så trenger ikke datamaskinen lenger å lese gjennom hver eneste rad hvis du skulle feks underforske hvilke sykkel_id som han er en hvis modell, med indeks så leses kun de aktuelle radene.
 
 **Case 2: Indeks passer ikke i RAM**
 
-[Skriv ditt svar her - forklar hvordan flettesortering kan brukes]
 
 dersom indeks ikke lagrings plass kan systemet forstsatt bruke en flettesortering som en alternativ metode for å sortere informasjon på. flettesortering går ut på og dele data i mindre deler og sorterer i de mindre delene, deretter så legger du sammen delene og sorterer dem igjen. denne prossesen er ikke like effectiv som indeksering men er fortsatt effectiv.
-**Datastrukturer i DBMS:**
 
-[Skriv ditt svar her - diskuter B+-tre og hash-indekser]
+**Datastrukturer i DBMS:**
 
 postgresSQL bruker B+-tre by default. dette er fordi B+-tre er et system som deler informasjon lik som grener og blader, hele treet er koblet så man kan lett finne ut hvilken gren informasjonen du søker for er også deretter blad gjennom hvilket blad-node informasjonen ligger. Dette er også nyttig for fordi det gjør det lettere å gjøre andre opperasjoner som (<,>). Derfor kan vi bruke feks
 sql.
@@ -319,22 +305,8 @@ WHERE sykkel_id <10.   --dette funker ikke siden den ikke har noen peiling på r
 
 ### Oppgave 4.3: Datastrukturer for logging
 
-**Foreslått datastruktur:**
 
-[Skriv ditt svar her - f.eks. heap-fil, LSM-tree, eller annen egnet datastruktur]
-
-**Begrunnelse:**
-
-**Skrive-operasjoner:**
-
-[Skriv ditt svar her - forklar hvorfor datastrukturen er egnet for mange skrive-operasjoner]
-
-**Lese-operasjoner:**
-
-[Skriv ditt svar her - forklar hvordan datastrukturen håndterer sjeldne lese-operasjoner]
-
----
-om jeg skulle ha implementert loggføring så hadde jeg brukt en heap-fil datastruktur. siden det som er fornuftig loggføre hver gang en kunde utleier en sykker og innleverer den som er greit å ha i en kronologisk sortering som heap-fil gjør by default. pluss tilsammen blir det litt mange små skrive opperasjoner. samtidig som at det er veldig sjeldent at man skal drive å lese disse loggene det er ikke mye interesant der. derfor er en heap-fil mer aktuell for denne data modellen. sammenliknet med en LSM-tree som er mer komplisert og brukt for å loggføre veldig store systemer eller for å analysere loggene.
+Dersom om jeg skulle ha implementert loggføring så hadde jeg brukt en heap-fil datastruktur. siden det som er fornuftig loggføre hver gang en kunde utleier en sykker og innleverer den som er greit å ha i en kronologisk sortering som heap-fil gjør by default. pluss tilsammen blir det litt mange små skrive opperasjoner. samtidig som at det er veldig sjeldent at man skal drive å lese disse loggene, siden det ikke er mye interesant der. derfor er en heap-fil mer aktuell for denne data modellen. sammenliknet med en LSM-tree som er mer komplisert og brukt for å loggføre veldig store systemer eller for å analysere loggene.
 
 
 
@@ -342,31 +314,12 @@ om jeg skulle ha implementert loggføring så hadde jeg brukt en heap-fil datast
 
 **Hvor bør validering gjøres:**
 
-[Skriv ditt svar her - argumenter for validering i ett eller flere lag]
-
 dersom dette systemet skulle had en web-applikasjon med et applikasjonslag så hadde det vært fornuftig å ha det på alle lag nettleseren, applikasjonslag, og databasen.
 
 Valideringen i nettleser bør hovedsaklig være for bedre bruker opplevelse og for små skjekk for epost og mobilnr. Databassen bør ha vaildering for å sikre integritet, jeg har allerede implimentert CHECK RESTRAINTS for å sikre at kun gokjente eposter og mobilnr kan bli inkludert i databasen. Men der det er aller viktigst å ha validering er i applikasjonslaget siden det fungerer som hjernen av systemet. forretningsreglene ligger i dette laget som betyr at dersom noe hadde skjedd i dette laget hadde det hatt størst konsekvens. Itillegg kommer alle input fra brukeren gjennom applikasjonslaget derfor vil det kreve mest vailidering.
+
 Valideringen bør altså ligge i alle lagene for å ha bedre datakvalitet og for å sikre systemet mot angrep og får at forretningslogikken ikke blir forstyrret. Validering bør være i  variende mengde, nettleser trenger ikke like mye og er hovedsaklig for bruker opplevelse. databasen bør ha det for å sikre datasystemet, men det bør ligge mye validering i applikasjonslaget siden det er det mest sentralet organet i systemet.
 
-**Validering i nettleseren:**
-
-[Skriv ditt svar her - diskuter fordeler og ulemper]
-
-
-**Validering i applikasjonslaget:**
-
-[Skriv ditt svar her - diskuter fordeler og ulemper]
-
-**Validering i databasen:**
-
-[Skriv ditt svar her - diskuter fordeler og ulemper]
-
-**Konklusjon:**
-
-[Skriv ditt svar her - oppsummer hvor validering bør gjøres og hvorfor]
-
----
 
 ### Oppgave 4.5: Refleksjon over læringsutbytte
 
@@ -384,12 +337,10 @@ Se oversikt over læringsmålene i en PDF-fil i Canvas https://oslomet.instructu
 
 **Hva var mest utfordrende:**
 
-[Skriv din refleksjon her - diskuter hvilke deler av oppgaven som var mest krevende]
 
-Den mest krevende delen av oppgaven var oppgave 1 og 2. Oppgave 1 handlet om å lage en godt datamodell som var utfordrene siden jeg ikke hadde øvd nok på det. Oppgave 2 var utfordrene på grunn av utleie testdataen. det tok langt tid å lære hvordan jeg skulle gjøre det. 
+Den mest krevende delen av oppgaven var oppgave 1 og 2. Oppgave 1 handlet om å lage en godt datamodell som var utfordrene siden jeg ikke hadde øvd nok på det. Oppgave 2 var utfordrene på grunn av utleie testdataen. det tok langt tid å lære hvordan jeg skulle gjøre det.
+
 **Hva har du lært om databasedesign:**
-
-[Skriv din refleksjon her - reflekter over prosessen med å designe en database fra bunnen av]
 
 jeg har lært at man kan Designe databaser med sikkerhet og dataintegritet og at det er mer enn å bare lagre data. det er veldig mange små detaljer som er nødvenidege for å ha en god database, som a asigne korrekte datatype og bestemme om du skal bruke naturlig eller surrogat nøkkler. Fremmed nøkkler var en av de mest utfordrene og viktigste aspectene som jeg lærte gjennom oppgaven. Prossesen er fylt med små valg som blir betydnings fylle slutt resultatet av databasen.
 
