@@ -77,30 +77,23 @@ INSERT INTO kunde (fornavn, etternavn, epost, mobilnr) VALUES
 
 
 
-INSERT INTO utleie (
-    kunde_id,
-    sykkel_id,
-    start_stasjon_id,
-    slutt_stasjon_id,
-    utleie_tidspunkt,
-    innlevert_tidspunkt,
-    leie_beløp
+INSERT INTO utleie ( kunde_id, sykkel_id, start_stasjon_id,
+ slutt_stasjon_id, utleie_tidspunkt, innlevert_tidspunkt, leie_beløp
 )
 SELECT
     (RANDOM() * 4 + 1)::INT,
     (RANDOM() * 99 + 1)::INT,
-    start_id,
+    (RANDOM() * 4 + 1)::INT,
     (RANDOM() * 4 + 1)::INT,
     utleie_tid,
     utleie_tid + (duration_minutes || ' minutes')::INTERVAL,
-    duration_minutes * 20
+    duration_minutes * 5
 FROM (
     SELECT
-        (RANDOM() * 4 + 1)::INT AS start_id,
         NOW() - (RANDOM() * INTERVAL '30 days') AS utleie_tid,
-        (RANDOM() * 120 + 5)::INT AS duration_minutes
+        (RANDOM() * 240 + 5)::INT AS duration_minutes
     FROM generate_series(1,50)
-) sub;
+)sub;
 
 
 -- DBA setninger (rolle: kunde, bruker: kunde_1)
